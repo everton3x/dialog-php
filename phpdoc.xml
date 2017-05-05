@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdocumentor>
+	<title>Dialog-PHP</title>
+    <parser>
+        <default-package-name>CLIP</default-package-name>
+        <target>output/build/doc</target>
+        <extensions>
+            <extension>php</extension>
+        </extensions>
+    </parser>
+    <transformer>
+        <target>doc</target>
+    </transformer>
+    <transformations>
+        <template name="clean" />
+    </transformations>
+	<files>
+		<directory>src</directory>
+	</files>
+</phpdocumentor>

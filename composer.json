@@ -1,0 +1,25 @@
+{
+    "name": "everton3x/dialog-php",
+    "description": "Dialog binding for PHP",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Everton da Rosa",
+            "email": "everton3x@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+		"php": ">=7.1",
+        "phpunit/phpunit": "^6.1"
+	},
+	"require-dev": {
+		"php": ">=7.1"
+	},
+	"autoload": {
+		"psr-4": {
+			"Dialog\\": "src/"
+		}
+	}
+}
