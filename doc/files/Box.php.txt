@@ -1,0 +1,86 @@
+<?php
+/**
+ * Dialog\Box class
+ * @author Everton da Rosa <everton3x@gmail.com>
+ * @since 1.0
+ * @package Dialog
+ */
+namespace Dialog;
+
+/**
+ * Abstraction to widget box option.
+ * 
+ * All dialog boxes have at least three parameters:
+ * 
+ * - text   the caption or contents of the box.
+ * 
+ * - height the height of the dialog box.
+ * 
+ * - width  the width of the dialog box.
+ * 
+ * - Other parameters depend on the box type.
+ */
+abstract class Box
+{
+    /**
+     *
+     * @var string the caption or contents of the box.
+     */
+	protected $text = false;
+    
+    /**
+     *
+     * @var int the height of the dialog box.
+     */
+	protected $height = 0;
+    
+    /**
+     *
+     * @var int the width of the dialog box.
+     */
+	protected $width = 0;
+
+    /**
+     * Set --text option
+     * @param string $text
+     * @return void
+     * @see self::$text
+     */
+	public function setText(string $text): void
+	{
+		$this->text = $text;
+		return;
+	}
+
+    /**
+     * Set --height option
+     * 
+     * @param int $height
+     * @return void
+     * @see self::$height
+     */
+	public function setHeight(int $height): void
+	{
+		$this->height = $height;
+		return;
+	}
+
+    /**
+     * Set --width option
+     * 
+     * @param int $width
+     * @return void
+     * @see self::$width
+     */
+	public function setWidth(int $width): void
+	{
+		$this->width = $width;
+		return;
+	}
+
+    /**
+     * Parse specific box options.
+     */
+	abstract public function getBoxOptionString(): string;
+}
+

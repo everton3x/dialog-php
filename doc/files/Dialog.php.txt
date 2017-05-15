@@ -1,0 +1,120 @@
+<?php
+namespace Dialog;
+
+/**
+ * This is a main class to binding the dialog to display dialog boxes from shell scripts using PHP.
+ * 
+ * This documentation uses http://invisible-island.net/dialog/manpage/dialog.txt as the base documentation.
+ * @author Everton da Rosa <everton3x@gmail.com>
+ * @since 1.0
+ * @package Dialog
+ */
+
+class Dialog
+{
+    
+    /*
+     * Define any of these variables to change the exit code on
+     * Cancel (1), error (-1), ESC (255), Extra (3), Help  (2),
+     * Help  with  --item-help  (4), or OK (0).  Normally shell
+     * scripts cannot distinguish between -1 and 255.
+     */
+	const BUTTON_YES = 0;
+	const BUTTON_OK = 0;
+	const BUTTON_NO = 1;
+	const BUTTON_CANCEL = 1;
+	const BUTTON_HELP = 2;
+	const BUTTON_EXTRA = 3;
+	const BUTTON_ITEM_HELP = 4;
+	const ERROR = -1;
+    const ESC = 255;
+
+    /**
+     *
+     * @var \Dialog\Box An instance of box options class.
+     */
+	protected $widget = null;
+    
+    /**
+     *
+     * @var \Dialog\CommonOptions An instance of commons options for dialog.
+     */
+	protected $common = null;
+    
+    /**
+     *
+     * @var int Exit code returned by dialog.
+     */
+	protected $exit_code = null;
+
+    /**
+     * Constructor to a Dialog instance.
+     * 
+     * @param \Dialog\CommonOptions $common Options commons for dialog.
+     * @param \Dialog\Box $widget Box options for dialog.
+     */
+    public function __construct(CommonOptions $common, Box $widget)
+    {
+		$this->common = $common;
+		$this->widget = $widget;
+    }
+
+    /**
+     * Parse the common options and box options to sring of the options for dialog use.
+     * @return string
+     */
+	public function getDialogOptionString(): string
+	{
+		$str = '';
+
+		$str .= $this->common->parseCommonOptions($this->common->getCommonOptionsConfigured());
+
+		$str .= " {$this->widget->getBoxOptionString()}";
+
+		return $str;
+	}
+
+    /**
+     * Run de dialog program with common options and box options.
+     * @return string Return the stdout from dialog.
+     */
+    public function run(): string
+    {
+		$args = $this->getDialogOptionString();
+		// exit($args.PHP_EOL);
+        // Adapted from https://stackoverflow.com/questions/4711904/using-linux-dialog-command-from-php/8738422#8738422
+        $pipes = array (NULL, NULL, NULL);
+        // Allow user to interact with dialog
+        $in = fopen ('php://stdin', 'r');
+        $out = fopen ('php://stdout', 'w');
+        // But tell PHP to redirect stderr so we can read it
+        $p = proc_open ('dialog '.$args, array (
+            0 => $in,
+            1 => $out,
+            2 => array ('pipe', 'w')
+        ), $pipes);
+        // Wait for and read result
+        $result = stream_get_contents ($pipes[2]);
+		$status = proc_get_status($p);
+		$this->exit_code = $status['exitcode'];
+        // Close all handles
+        fclose ($pipes[2]);
+        fclose ($out);
+        fclose ($in);
+        proc_close ($p);
+        // Return result
+        return (string) $result;
+    }
+
+    /**
+     * Get exit code from dialog program.
+     * 
+     * @return int
+     */
+	public function getExitCode(): int
+	{
+		return $this->exit_code;
+	}
+
+}
+

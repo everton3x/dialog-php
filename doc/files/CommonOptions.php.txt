@@ -1,0 +1,1629 @@
+<?php
+
+/**
+ * Dialog\CommonOptions class
+ * @author Everton da Rosa <everton3x@gmail.com>
+ * @since 1.0
+ * @package Dialog
+ */
+namespace Dialog;
+
+use ReflectionClass;
+use ReflectionProperty;
+
+/**
+ * Represents the common options for dialog program.
+ */
+class CommonOptions
+{
+
+    /*
+     * Buttons names for dialog
+     */
+	const BUTTON_NAME_OK = 'ok';
+	const BUTTON_NAME_YES = 'yes';
+	const BUTTON_NAME_CANCEL = 'cancel';
+	const BUTTON_NAME_NO = 'no';
+	const BUTTON_NAME_HELP = 'help';
+	const BUTTON_NAME_EXTRA = 'extra';
+
+    /**
+     *
+     * @var bool Rather than draw graphics lines around boxes, draw ASCII "+" and
+     * "-" in the same place.  See also "--no-lines".
+     */
+    protected $option_ascii_lines = false;
+    
+    /**
+     *
+     * @var int This  gives  you some control over the box dimensions when using
+     * auto sizing (specifying 0 for height and width).  It  represents
+     * width / height.  The default is 9, which means 9 characters wide
+     * to every 1 line high.
+     */
+    protected $option_aspect = false;
+    
+    /**
+     *
+     * @var string Specifies a backtitle string to be displayed on the backdrop,
+     *  atthe top of the screen.
+     */
+    protected $option_backtitle = false;
+    
+    /**
+     *
+     * @var array Specify the position of the upper left corner of a dialog
+     *  box on the screen. Array format is [y, x].
+     * @see \Dialog\Parser::parse_value_for_begin()
+     */
+    protected $option_begin = false;
+    
+    /**
+     *
+     * @var string Override the label used for "Cancel" buttons.
+     */
+    protected $option_cancel_label = false;
+    
+    /**
+     * Clears the widget screen, keeping only  the  screen_color  back-ground.
+     * 
+     * Use  this when you combine widgets with "--and-widget" to erase the
+     *  contents of a previous widget on the screen, so  it won't  be seen
+     *  under the contents of a following widget.  Under- stand this as the
+     *  complement of "--keep-window".  To compare the effects, use these:
+     <pre>
+              All three widgets visible, staircase effect, ordered 1,2,3:
+
+              dialog \
+                                             --begin 2 2 --yesno "" 0 0 \
+                  --and-widget               --begin 4 4 --yesno "" 0 0 \
+                  --and-widget               --begin 6 6 --yesno "" 0 0
+
+              Only the last widget is left visible:
+
+              dialog \
+                               --clear       --begin 2 2 --yesno "" 0 0 \
+                  --and-widget --clear       --begin 4 4 --yesno "" 0 0 \
+                  --and-widget               --begin 6 6 --yesno "" 0 0
+
+              All three widgets visible, staircase effect, ordered 3,2,1:
+
+              dialog \
+                               --keep-window --begin 2 2 --yesno "" 0 0 \
+                  --and-widget --keep-window --begin 4 4 --yesno "" 0 0 \
+                  --and-widget               --begin 6 6 --yesno "" 0 0
+
+              First and third widget visible, staircase effect, ordered 3,1:
+
+              dialog \
+                               --keep-window --begin 2 2 --yesno "" 0 0 \
+                  --and-widget --clear       --begin 4 4 --yesno "" 0 0 \
+                  --and-widget               --begin 6 6 --yesno "" 0 0
+
+              Note,  if  you  want to restore original console colors and send
+              your cursor home after the dialog program has  exited,  use  the
+              clear (1) command.
+     </pre>
+     * @var bool
+     */
+    protected $option_clear = false;
+    
+    /**
+     * Interpret embedded "\Z" sequences in the dialog text by the fol-lowing
+     *  character, which tells dialog to set colors or video  at-tributes:
+     *
+     * - 0  through  7  are  the  ANSI  color numbers used in curses:
+     *             black, red, green, yellow, blue, magenta, cyan and white
+     *  re-spectively.
+     *
+     * - Bold is set by 'b', reset by 'B'.
+     *
+     * - Reverse is set by 'r', reset by 'R'.
+     *
+     * - Underline is set by 'u', reset by 'U'.
+     *
+     * - The  settings  are cumulative, e.g., "\Zb\Z1" makes the fol-lowing
+     *  text bold (perhaps bright) red.
+     *
+     * - Restore normal settings with "\Zn".
+     * 
+     * @var mixed
+     */
+    protected $option_colors = false;
+    
+    /**
+     *
+     * @var string Tell dialog to split data for radio/checkboxes and menus on
+     *  the occurrences of the given string, and to align the split data
+     *  into columns.
+     */
+    protected $option_column_separator = false;
+    
+    /**
+     * Interpret embedded newlines in the dialog text as a  newline  on the
+     *  screen. Otherwise, dialog will only wrap lines where needed to fit
+     *  inside the text box.
+     * 
+     * Even though you can control line breaks with this,  Dialog  will still
+     *  wrap any lines that are too long for the width of the box.
+     * 
+     * Without cr-wrap, the layout of your text  may  be  formatted  to look
+     *   nice  in  the source code of your script without affecting the way
+     *  it will look in the dialog.
+     * 
+     * @see self::$option_no_collapse
+     * @see self::$option_trim
+     * 
+     * @var bool
+     * @todo setter and getter
+     */
+    protected $option_cr_wrap = false;
+    
+    /**
+     * When dialog supports run-time configuration, this can be used to dump
+     *  a sample configuration file to the file specified by file.
+     * @var string
+     * @todo setter and getter
+     */
+    protected $option_create_rc = false;
+    
+    /**
+     * If the host provides strftime, this option allows you to specify the
+     *  format of the date printed for the --calendar  widget.   The time
+     *  of day (hour, minute, second) are the current local time.
+     * 
+     * @see \Dialog\Widget\Calendar()
+     * @var string
+     */
+    protected $option_date_format = false;
+    
+    /**
+     *
+     * @var bool Make  the  default value of the yes/no box a No.  Likewise,
+     *  make the default button of widgets that provide "OK" and  "Cancel"  a
+     * Cancel.   If "--nocancel" or "--visit-items" are given those op-tions
+     *  overrides this, making the  default  button  always  "Yes"
+     *  (internally the same as "OK").
+     */
+    protected $option_defaultno = false;
+    
+    /**
+     * Set the default (preselected) button in a widget.
+     *  By preselecting a button, a script makes it possible for the user to
+     *  simply press  Enter  to  proceed through a dialog with minimum
+     *  interaction.
+     * 
+     * The option's value is the name of the button: ok,  yes,  cancel,
+     * no, help or extra.
+     * 
+     * Normally  the  first  button in each widget is the default.  The
+     * first button shown is determined by the widget together with the
+     * "--nook"  and "--nocancel options.  If this option is not given,
+     * there is no default button assigned.
+     * 
+     * @var string
+     * 
+     * @todo setter and gettr to use BUTTON_NAME_ constants
+     */
+    protected $option_default_button = false;
+    
+    /**
+     * Set the default item in a checklist, form or menu box.  Normally
+     * the first item in the box is the default.
+     * 
+     * @var string
+     */
+    protected $option_default_item = false;
+    
+    /**
+     * Override the label used for "EXIT" buttons.
+     * 
+     * @var string
+     */
+    protected $option_exit_label = false;
+    
+    /**
+     * Show an extra button, between "OK" and "Cancel" buttons.
+     * 
+     * @var bool
+     */
+    protected $option_extra_button = false;
+    
+    /**
+     * Override  the  label used for "Extra" buttons.  Note: for input-menu
+     *  widgets, this defaults to "Rename".
+     * @var string
+     */
+    protected $option_extra_label = false;
+    
+    /**
+     * Prints the help message to the standard output and  exits.   The
+     * help  message  is also printed if no options are given, or if an
+     * unrecognized option is given.
+     * 
+     * @var bool
+     */
+    protected $option_help = false;
+    
+    /**
+     * Show a help-button after "OK" and  "Cancel"  buttons,  i.e.,  in
+     * checklist, radiolist and menu boxes.
+     * 
+     * On  exit,  the  return status will indicate that the Help button
+     * was pressed.  Dialog will also write a message to its output after
+     *  the token "HELP":
+     * 
+     * - If  "--item-help"  is also given, the item-help text will be written.
+     *
+     * - Otherwise, the item's tag (the first field) will be written.
+     * 
+     * You  can  use  the  --help-tags  option  and/or  set  the
+     *  DIALOG_ITEM_HELP  environment variable to modify these messages and
+     * exit-status.
+     * 
+     * @var bool
+     */
+    protected $option_help_button = false;
+    
+    /**
+     * Override the label used for "Help" buttons.
+     * 
+     * @var string
+     */
+    protected $option_help_label = false;
+    
+    /**
+     * If the help-button is selected, writes the checklist,  radiolist
+     * or  form  information  after  the  item-help "HELP" information.
+     * 
+     * This can be used to reconstruct the state of a  checklist  after
+     * processing the help request.
+     * 
+     * @var bool
+     */
+    protected $option_help_status = false;
+    
+    /**
+     * Modify  the messages written on exit for --help-button by making
+     * them always just the item's tag.  This does not affect the  exit
+     * status code.
+     * 
+     * @var bool
+     */
+    protected $option_help_tags = false;
+    
+    /**
+     * Display the given file using a textbox when the user presses F1.
+     * 
+     * @var string
+     * 
+     */
+    protected $option_hfile = false;
+    
+    /**
+     * Display the given string centered at the bottom of the widget.
+     * 
+     * @var string
+     */
+    protected $option_hline = false;
+    
+    /**
+     * Ignore  options that dialog does not recognize.  Some well-known
+     * ones such as "--icon" are ignored anyway, but this is  a  better
+     * choice for compatibility with other implementations.
+     * 
+     * @var bool
+     */
+    protected $option_ignore = false;
+    
+    /**
+     * Read keyboard input from the given file descriptor.  Most dialog
+     * scripts read from the standard input, but the gauge widget reads
+     * a pipe (which is always standard input).  Some configurations do
+     * not work properly when dialog tries to reopen the terminal.  Use
+     * this  option  (with appropriate juggling of file-descriptors) if
+     * your script must work in that type of environment.
+     * 
+     * @var type 
+     * @todo Implements this?
+     */
+    protected $option_input_fd = false;
+    
+    /**
+     * Makes the password widget friendlier but less secure, by echoing
+     * asterisks for each character.
+     * 
+     * @var bool
+     */
+    protected $option_insecure = false;
+    
+    /**
+     * Set  the starting point for the week-number shown in the "--cal-endar"
+     *  option according to ISO-8601, which starts numbering with
+     * the first week which includes a Thursday in January.
+     * 
+     * @var bool
+     */
+    protected $option_iso_week = false;
+    
+    /**
+     * Interpret  the tags data for checklist, radiolist and menu boxes
+     * adding a column which is displayed in the  bottom  line  of  the
+     * screen, for the currently selected item.
+     * 
+     * @var bool
+     */
+    protected $option_item_help = false;
+    
+    /**
+     * When  built with ncurses, dialog normally checks to see if it is
+     * running in an xterm, and in that case tries to suppress the
+     *  initialization  strings  that would make it switch to the alternate
+     * screen.  Switching between the normal and alternate  screens  is
+     * visually  distracting  in  a  script  which  runs dialog several
+     * times.  Use this option to allow dialog to use those initialization
+     *  strings.
+     * 
+     * @var bool
+     */
+    protected $option_keep_tite = false;
+    
+    /**
+     * Normally when dialog performs several tailboxbg widgets connected
+     *  by "--and-widget", it clears the old widget from  the  screen
+     * by  painting over it.  Use this option to suppress that repainting.
+     * 
+     * At exit, dialog repaints all of  the  widgets  which  have  been
+     * marked with "--keep-window", even if they are not tailboxbg widgets.
+     * 
+     * That causes them to be repainted in reverse  order.   See
+     * the discussion of the "--clear" option for examples.
+     *
+     * @var bool
+     */
+    protected $option_keep_window = false;
+    
+    /**
+     * At  exit,  report  the last key which the user entered.  This is
+     * the curses key code rather than a symbol or  literal  character.
+     * 
+     * It  can be used by scripts to distinguish between two keys which
+     * are bound to the same action.
+     * 
+     * @var bool
+     */
+    protected $option_last_key = false;
+    
+    /**
+     * Limit input strings to the given size.  If  not  specified,  the
+     * limit is 2048.
+     * 
+     * @var int
+     */
+    protected $option_max_input = false;
+    
+    /**
+     * Suppress the "Cancel" button in checklist, inputbox and menu box
+     * modes.  A script can still test if the user pressed the ESC  key
+     * to cancel to quit.
+     * 
+     * @var bool
+     */
+    protected $option_no_cancel = false;
+    
+    /**
+     * Normally  dialog  converts  tabs  to spaces and reduces multiple
+     * spaces to a single space for text which is displayed in  a
+     *   message boxes, etc.  Use this option to disable that feature.  Note
+     * that dialog will still wrap text, subject to the "--cr-wrap" and
+     * "--trim" options.
+     * 
+     * @var bool
+     * @see self::$option_cr_wrap
+     * @see self::$option_trim
+     */
+    protected $option_no_collapse = false;
+    
+    /**
+     * Some  widgets  (checklist, inputmenu, radiolist, menu) display a
+     * list with two columns (a "tag" and "item", i.e., "description").
+     * 
+     * This  option  tells  dialog  to  read shorter rows, omitting the
+     * "item" part of the list.  This is occasionally useful, e.g.,  if
+     * the tags provide enough information.
+     * 
+     * See  also --no-tags.  If both options are given, this one is ignored.
+     * 
+     * @var bool
+     * @see self::$option_no_tags
+     */
+    protected $option_no_items = false;
+    
+    /**
+     * Tells dialog to put the tailboxbg box in the background,  printing
+     *   its  process id to dialog's output.  SIGHUP is disabled for
+     * the background process.
+     * 
+     * @var bool
+     */
+    protected $option_no_kill = false;
+    
+    /**
+     * Override the label used for "No" buttons.
+     *
+     * @var string
+     */
+    protected $option_no_label = false;
+    
+    /**
+     * Rather than draw lines around boxes, draw  spaces  in  the  same
+     * place.  See also "--ascii-lines".
+     * 
+     * @var bool
+     * @see self::$option_ascii_lines
+     */
+    protected $option_no_lines = false;
+    
+    /**
+     * Do not enable the mouse.
+     * 
+     * @var bool
+     */
+    protected $option_no_mouse = false;
+    
+    /**
+     * Do  not  convert "\n" substrings of the message/prompt text into
+     * literal newlines.
+     * 
+     * @var bool
+     */
+    protected $option_no_nl_expand = false;
+    
+    /**
+     * Suppress the "OK" button in checklist,  inputbox  and  menu  box
+     * modes.   A script can still test if the user pressed the "Enter"
+     * key to accept the data.
+     * 
+     * @var bool
+     */
+    protected $option_no_ok = false;
+    
+    /**
+     * Suppress shadows that would be drawn to the right and bottom  of
+     * each dialog box.
+     * @var bool
+     */
+    protected $option_no_shadow = false;
+    
+    /**
+     * Some  widgets  (checklist, inputmenu, radiolist, menu) display a
+     * list with two columns (a "tag" and "description").  The  tag  is
+     * useful  for scripting, but may not help the user.  The --no-tags
+     * option (from Xdialog) may be used to suppress the column of tags
+     * from  the  display.  Unlike the --no-items option, this does not
+     * affect the data which is read from the script.
+     * 
+     * Xdialog does not  display  the  tag  column  for  the  analogous
+     * buildlist and treeview widgets; dialog does the same.
+     * 
+     * Normally  dialog  allows  you  to quickly move to entries on the
+     * displayed list, by matching a  single  character  to  the  first
+     * character  of the tag.  When the --no-tags option is given, dialog
+     *  matches against the first character of the description.   In
+     * either case, the matchable character is highlighted.
+     * 
+     * @var bool
+     */
+    protected $option_no_tags = false;
+    
+    /**
+     * Override the label used for "OK" buttons.
+     * 
+     * @var string
+     */
+    protected $option_ok_label = false;
+    
+    /**
+     * Direct output to the given file descriptor.  Most dialog scripts
+     * write to the standard error, but  error  messages  may  also  be
+     * written there, depending on your script.
+     * 
+     * @var type 
+     * @todo Implements this?
+     */
+    protected $option_output_fd = false;
+    
+    /**
+     * Specify  a string that will separate the output on dialog's output
+     *  from checklists, rather than a newline (for  --separate-out-put)
+     *   or  a  space.  This applies to other widgets such as forms
+     * and editboxes which normally use a newline.
+     * 
+     * @var string
+     */
+    protected $option_separator = false;
+    
+    /**
+     * Print the maximum size of dialog boxes, i.e., the  screen  size,
+     * to  dialog's  output.  This may be used alone, without other op
+     * tions.
+     * @var bool
+     */
+    protected $option_print_maxsize = false;
+    
+    /**
+     * Prints the size of each dialog box to dialog's output.
+     * 
+     * @var bool
+     */
+    protected $option_print_size = false;
+    
+    /**
+     * Prints dialog's version to dialog's output.  This  may  be  used
+     * alone,  without other options.  It does not cause dialog to exit
+     * by itself.
+     * 
+     * @var bool
+     */
+    protected $option_print_version = false;
+    
+    /**
+     * Normally dialog quotes the strings returned  by  checklist's  as
+     * well as the item-help text.  Use this option to quote all string
+     * results.
+     * 
+     * @var bool
+     */
+    protected $option_quoted = false;
+    
+    /**
+     * For  widgets  holding a scrollable set of data, draw a scrollbar
+     * on its right-margin.  This does not respond to the mouse.
+     * 
+     * @var bool
+     */
+    protected $option_scrollbar = false;
+    
+    /**
+     * For certain widgets (buildlist, checklist, treeview), output result
+     *   one  line  at  a  time, with no quoting.  This facilitates
+     * parsing by another program.
+     * 
+     * @var bool
+     */
+    protected $option_separate_output = false;
+    
+    /**
+     * Specify a string that will separate the output on dialog's  output
+     *   from each widget.  This is used to simplify parsing the result
+     *  of a dialog with several widgets.  If this  option  is  not
+     * given, the default separator string is a tab character.
+     * 
+     * @var string
+     */
+    protected $option_separate_widget = false;
+    
+    /**
+     * Draw a shadow to the right and bottom of each dialog box.
+     * 
+     * @var bool
+     */
+    protected $option_shadow = false;
+    
+    /**
+     * Use single-quoting as needed (and no quotes if unneeded) for the output
+     *  of checklist's as well as the item-help  text.   If  this
+     * option  is  not set, dialog uses double quotes around each item.
+     * 
+     * In either case, dialog adds backslashes to make the output  useful
+     *  in shell scripts.
+     * 
+     * @var bool
+     */
+    protected $option_single_quoted = false;
+    
+    /**
+     * Check  the  resulting  size of a dialog box before trying to use
+     * it, printing the resulting size if it is larger than the screen.
+     * (This  option  is  obsolete,  since  all  new-window  calls  are
+     * checked).
+     * 
+     * @var bool
+     */
+    protected $option_size_err = false;
+    
+    /**
+     * Sleep (delay) for the given number of seconds after processing a
+     * dialog box.
+     * 
+     * @var int
+     */
+    protected $option_sleep = false;
+    
+    /**
+     * Direct output to the standard error.  This is the default, since
+     * curses normally writes screen updates to the standard output.
+     * 
+     * @var bool
+     */
+    protected $option_stderr = false;
+    
+    /**
+     * Direct output to the standard output.  This option  is  provided
+     * for  compatibility  with  Xdialog,  however using it in portable
+     * scripts is not recommended, since  curses  normally  writes  its
+     * screen  updates to the standard output.  If you use this option,
+     * dialog attempts to reopen the terminal so it can  write  to  the
+     * display.   Depending  on the platform and your environment, that
+     * may fail.
+     * 
+     * @var bool
+     */
+    protected $option_stdout = false;
+    
+    /**
+     * onvert each tab character  to  one  or  more  spaces  (for  the
+     * textbox  widget;  otherwise to a single space).  Otherwise, tabs
+     * are rendered according to the curses  library's  interpretation.
+     * 
+     * The --no-collapse option disables tab expansion.
+     * 
+     * @var bool
+     * @see self::$option_no_collapse
+     */
+    protected $option_tab_correct = false;
+    
+    /**
+     * Specify  the  number  of spaces that a tab character occupies if
+     * the "--tab-correct" option is given.  The default  is  8.   This
+     * option is only effective for the textbox widget.
+     * 
+     * @var int
+     */
+    protected $option_tab_len = false;
+    
+    /**
+     * If the host provides strftime, this option allows you to specify
+     * the format of the time printed for the  --timebox  widget.   The
+     * day,  month,  year values in this case are for the current local
+     * time.
+     * 
+     * @var string
+     */
+    protected $option_time_format = false;
+    
+    /**
+     * Timeout (exit with error code) if no user  response  within  the
+     * given number of seconds.  A timeout of zero seconds is ignored.
+     * 
+     * This  option  is  ignored  by  the "--pause" widget.  It is also
+     * overridden if the background "--tailboxbg"  option  is  used  to
+     * setup multiple concurrent widgets.
+     * 
+     * @var int
+     */
+    protected $option_timeout = false;
+    
+    /**
+     * Specifies  a title string to be displayed at the top of the dialog box.
+     * 
+     * @var string
+     */
+    protected $option_title = false;
+    
+    /**
+     * Logs the command-line parameters, keystrokes and other  information
+     *  to the given file.  If dialog reads a configure file, it is
+     * logged as well.  Piped input to the gauge widget is logged.  Use
+     * control/T to log a picture of the current dialog window.
+     * 
+     * @var string
+     */
+    protected $option_trace = false;
+    
+    /**
+     * Sets the starting day for the week, used in the "--calendar" option.
+     * 
+     * The day parameter can be:
+     * 
+     * - a number (0 to 6, Sunday through Saturday using POSIX) or
+     * 
+     * - the special value "locale" (this works  with  systems  using
+     * glibc,  providing  an  extension  to the locale command, the
+     * first_weekday value).
+     * 
+     * - a string matching one of the abbreviations for  the  day  of
+     * the  week shown in the calendar widget, e.g., "Mo" for "Monday".
+     * 
+     * The dialog program handles some command-line parameters specially,  and
+     * removes  them from the parameter list as they are processed.  For
+     *  example, if the first option is --trace, then that is  processed
+     *   (and  removed) before dialog initializes the display.
+     * 
+     * @var int
+     */
+    protected $option_week_start = false;
+    
+    /**
+     * Eliminate  leading  blanks,  trim  literal newlines and repeated
+     * blanks from message text.
+     * 
+     * See also the "--cr-wrap" and "--no-collapse" options.
+     * 
+     * @var bool
+     * @see self::$option_cr_wrap
+     * @see self::$option_no_collapse
+     */
+    protected $option_trim = false;
+    
+    /**
+     * Prints dialog's version to the standard output, and exits.   See
+     * also "--print-version".
+     * 
+     * @var bool
+     */
+    protected $option_version = false;
+    
+    /**
+     * Modify  the  tab-traversal  of checklist, radiolist, menubox and
+     * inputmenu to include the list of items as  one  of  the  states.
+     * 
+     * This  is useful as a visual aid, i.e., the cursor position helps
+     * some users.
+     * 
+     * When this option is given, the cursor is initially placed on the
+     * list.   Abbreviations (the first letter of the tag) apply to the
+     * list items.  If you tab to the button row,  abbreviations  apply
+     * to the buttons.
+     * 
+     * @var bool
+     */
+    protected $option_visit_items = false;
+    
+    /**
+     * Override the label used for "Yes" buttons.
+     * 
+     * @var string
+     */
+    protected $option_yes_label = false;
+
+    /**
+     * Return list of common options configured.
+     * 
+     * @return array
+     */
+    public function getCommonOptionsConfigured(): array
+    {
+        $options = [];
+
+        $reflect = new ReflectionClass($this);
+        $properties = $reflect->getProperties(ReflectionProperty::IS_PROTECTED);
+        foreach($properties as $p) {
+            $pname = $p->name;//return property name wihtout $
+
+            if(substr($pname, 0, 7) === 'option_' && $this->{$pname} !== false) {
+                $options[substr($pname, 7)] = $this->{$pname};
+            }
+
+        }
+
+        return $options;
+    }
+
+    /**
+     * Parse an array with a list of common options configured to string of the dialog configuration.
+     * 
+     * @param array $options
+     * @return string
+     */
+    public function parseCommonOptions(array $options): string
+    {
+        $str = '';
+
+        foreach($options as $name => $value) {
+
+			if($this->optionParserExists($name) === true) {
+				$str_value = $this->callOptionValueParser($name, $value);
+			}else{
+				$str_value = $value;
+			}
+
+            $str .= " {$this->getOptionString($name, $str_value)}";
+        }
+
+        return $str;
+    }
+
+    /**
+     * Get the option string on dialog format.
+     * 
+     * @param string $name Option name
+     * @param mixed $value Option value
+     * @return string
+     */
+	protected function getOptionString(string $name, $value): string
+	{
+		$option = str_replace('_', '-', $name);
+
+		if(is_bool($value)){
+			return "--$option";
+		}elseif(is_string($value)){
+			$value = "'$value'";
+		}elseif(is_array($value)){
+			$value = join(' ', $value);
+		}
+
+		return "--$option $value";
+	}
+
+    /**
+     * Check if an option parser exist into Parser class.
+     * @param string $option
+     * @return bool
+     * @see \Dialog\Parser()
+     */
+	protected function optionParserExists(string $option): bool
+	{
+		return method_exists('Dialog\Parser', "parse_value_for_$option");
+	}
+
+    /**
+     * Call an option parser.
+     * 
+     * @param string $option_name
+     * @param mixed $value
+     * @return string
+     * @see \Dialog\Parser()
+     */
+	protected function callOptionValueParser(string $option_name, $value): string
+	{
+		$parser = "Dialog\Parser::parse_value_for_$option_name";
+		return $parser($value);
+	}
+
+    /**
+     * Set --backtitle option.
+     * 
+     * @param string $backtitle
+     * @return void
+     * @see self::$option_backtitle
+     */
+	public function setBacktitle(string $backtitle): void
+	{
+		$this->option_backtitle = $backtitle;
+		return;
+	}
+
+    /**
+     * Set --begin option
+     * 
+     * @param int $y
+     * @param int $x
+     * @return void
+     * @see self::$option_begin
+     */
+	public function setBegin(int $y, int $x): void
+	{
+		$this->option_begin = [$y, $x];
+		return;
+	}
+
+    /**
+     * Set --cancel-label option
+     * 
+     * @param string $label
+     * @return void
+     * @see self::$option_cancel-label
+     */
+	public function setCancelLabel(string $label): void
+	{
+		$this->option_cancel_label = $label;
+		return;
+	}
+
+    /**
+     * Set --column-separator option
+     * 
+     * @param string $separator
+     * @return void
+     * @see self::$option_column_separator
+     */
+	public function setColumnSeparator(string $separator): void
+	{
+		$this->option_column_separator = $separator;
+		return;
+	}
+
+    
+    /**
+     * Set --clear option
+     * 
+     * @see self::$option_clear
+     * @param bool $value
+     * @return void
+     */
+	public function setClear(bool $value): void
+	{
+		$this->option_clear = $value;
+	}
+
+    /**
+     * Set --cr-wrap
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_cr_wrap
+     */
+	public function setCrWrap(bool $value): void
+	{
+		$this->option_cr_wrap = $value;
+	}
+
+    /**
+     * Set --date-format
+     * 
+     * @param string $format
+     * @return void
+     * @see self::$option_date_format
+     */
+	public function setDateFormat(string $format): void
+	{
+		$this->option_date_format = $format;
+		return;
+	}
+
+    /**
+     * Set --defaultno option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_defaultno
+     */
+	public function setDefaultno(bool $value): void
+	{
+		$this->option_defaultno = $value;
+		return;
+	}
+
+    /**
+     * Set --default-button option
+     * 
+     * @param string $button
+     * @return void
+     * @see self::$option_default_button
+     */
+	public function setDefaultButton(string $button): void
+	{
+		$this->option_default_button = $button;
+		return;
+	}
+
+    /**
+     * Set --default-item option
+     * 
+     * @param string $item
+     * @return void
+     * @see self::$option_default_item
+     */
+	public function setDefaultItem(string $item): void
+	{
+		$this->option_default_item = $item;
+		return;
+	}
+
+    /**
+     * Set --exit-label option
+     * 
+     * @param string $label
+     * @return void
+     * @see self::$option_exit_label
+     */
+	public function setExitLabel(string $label): void
+	{
+		$this->option_exit_label = $label;
+		return;
+	}
+    
+    /**
+     * Set --extra-button option
+     * 
+     * @param bool $value
+     * @param string $label
+     * @return void
+     * @see self::$option_extra_button
+     */
+	public function setExtraButton(bool $value, string $label = null): void
+	{
+		$this->option_extra_button = $value;
+		if(!is_null($label)){
+			$this->setExtraLabel($label);
+		}
+		return;
+	}
+    
+    /**
+     * Set --extra-label option
+     * 
+     * @param string $label
+     * @return void
+     * @see self::$option_extra_label
+     */
+
+	public function setExtraLabel(string $label): void
+	{
+		$this->option_extra_label = $label;
+		return;
+	}
+
+    /**
+     * Set --help option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_help
+     */
+	public function setHelp(bool $value): void
+	{
+		$this->option_help = $value;
+		return;
+	}
+
+    /**
+     * Set --help-button option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_help_button
+     */
+	public function setHelpButton(bool $value): void
+	{
+		$this->option_help_button = $value;
+		return;
+	}
+
+    /**
+     * Set --help-label
+     * 
+     * @param string $label
+     * @return void
+     * @see self::$option_help_label
+     */
+	public function setHelpLabel(string $label): void
+	{
+		$this->option_help_label = $label;
+		return;
+	}
+
+    /**
+     * Set --hline option
+     * 
+     * @param string $value
+     * @return void
+     * @see self::$option_hline
+     */
+	public function setHline(string $value): void
+	{
+		$this->option_hline = $value;
+		return;
+	}
+
+    /**
+     * Set --ignore option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_ignore
+     */
+	public function setIgnore(bool $value): void
+	{
+		$this->option_ignore = $value;
+		return;
+	}
+
+    /**
+     * Set --insecure option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_insecure
+     */
+	public function setInsecure(bool $value): void
+	{
+		$this->option_insecure = $value;
+		return;
+	}
+
+    /**
+     * Set --keep-tite option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_keep_tite
+     */
+	public function setKeepTite(bool $value): void
+	{
+		$this->option_keep_tite = $value;
+		return;
+	}
+
+    /**
+     * Set --keep-window
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_keep_window
+     */
+	public function setKeepWindow(bool $value): void
+	{
+		$this->option_keep_window = $value;
+		return;
+	}
+
+    /**
+     * Set --max-input option
+     * 
+     * @param int $max
+     * @return void
+     * @see self::$option_max_input
+     */
+	public function setMaxInput(int $max): void
+	{
+		$this->option_max_input = $max;
+		return;
+	}
+
+    /**
+     * Set --no-cancel
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_no_cancel
+     */
+	public function setNoCancel(bool $value): void
+	{
+		$this->option_no_cancel = $value;
+		return;
+	}
+
+    /**
+     * Set --no-collapse option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_no_collapse
+     */
+	public function setNoCollapse(bool $value): void
+	{
+		$this->option_no_collapse = $value;
+		return;
+	}
+
+    /**
+     * Set --no-items option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_no_items
+     */
+	public function setNoItems(bool $value): void
+	{
+		$this->option_no_items = $value;
+		return;
+	}
+
+    /**
+     * Set --no-kill option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_no_kill
+     */
+	public function setNoKill(bool $value): void
+	{
+		$this->option_no_kill = $value;
+		return;
+	}
+
+    /**
+     * Set --no-label option
+     * 
+     * @param string $label
+     * @return void
+     * @see self::$option_no_label
+     */
+	public function setNoLabel(string $label): void
+	{
+		$this->option_no_label = $label;
+		return;
+	}
+
+    /**
+     * Set --no-lines option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_no_lines
+     */
+	public function setNoLines(bool $value): void
+	{
+		$this->option_no_lines = $value;
+		return;
+	}
+
+    /**
+     * Set --no-mouse option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_no_mouse
+     */
+	public function setNoMouse(bool $value): void
+	{
+		$this->option_no_mouse = $value;
+		return;
+	}
+
+    /**
+     * Set --no-nl-expand option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_no_nl_expand
+     */
+	public function setNoNlExpand(bool $value): void
+	{
+		$this->option_no_nl_expand = $value;
+		return;
+	}
+
+    /**
+     * Set --no-ok option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_no_ok
+     */
+	public function setNoOk(bool $value): void
+	{
+		$this->option_no_ok = $value;
+		return;
+	}
+
+    /**
+     * Set --no-shadow option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_no_shadow
+     */
+	public function setNoShadow(bool $value): void
+	{
+		$this->option_no_shadow = $value;
+		return;
+	}
+
+    /**
+     * Set --no-tags option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_no_tags
+     */
+	public function setNoTags(bool $value): void
+	{
+		$this->option_no_tags = $value;
+		return;
+	}
+
+    /**
+     * Set --ok-label option
+     * 
+     * @param string $label
+     * @return void
+     * @see self::$option_ok_label
+     */
+	public function setOkLabel(string $label): void
+	{
+		$this->option_ok_label = $label;
+		return;
+	}
+
+    /**
+     * Set --separator option
+     * 
+     * @param string $separator
+     * @return void
+     * @see self::$option_separator
+     */
+	public function setSeparator(string $separator): void
+	{
+		$this->option_separator = $separator;
+		return;
+	}
+
+    /**
+     * Set --print-maxsize
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_print_maxsize
+     */
+	public function setPrintMaxsize(bool $value): void
+	{
+		$this->option_print_maxsize = $value;
+		return;
+	}
+
+    /**
+     * Set --print-size option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_print_size
+     */
+	public function setPrintSize(bool $value): void
+	{
+		$this->option_print_size = $value;
+		return;
+	}
+
+    /**
+     * Set --print-version option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_print_version
+     */
+	public function setPrintVersion(bool $value): void
+	{
+		$this->option_print_version = $value;
+		return;
+	}
+
+    /**
+     * Set --quoted option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_quoted
+     */
+	public function setQuoted(bool $value): void
+	{
+		$this->option_quoted = $value;
+		return;
+	}
+
+    /**
+     * Set --scrollbar option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_scrollbar
+     */
+	public function setScrollbar(bool $value): void
+	{
+		$this->option_scrollbar = $value;
+		return;
+	}
+
+    /**
+     * Set --separate-output option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_separate_output
+     */
+	public function setSeparateOutput(bool $value): void
+	{
+		$this->option_separate_output = $value;
+		return;
+	}
+
+    /**
+     * Set --separate-widget option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_separate_widget
+     */
+	public function setSeparateWidget(bool $value): void
+	{
+		$this->option_separate_widget = $value;
+		return;
+	}
+
+    /**
+     * Set --shadow option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_shadow
+     */
+	public function setShadow(bool $value): void
+	{
+		$this->option_shadow = $value;
+		return;
+	}
+
+    /**
+     * Set --single-quoted option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_single_quoted
+     */
+	public function setSingleQuoted(bool $value): void
+	{
+		$this->option_single_quoted = $value;
+		return;
+	}
+
+    /**
+     * Set --size-err option
+     * @param bool $value
+     * @return void
+     * @see self::$option_size_err
+     */
+	public function setSizeErr(bool $value): void
+	{
+		$this->option_size_err = $value;
+		return;
+	}
+
+    /**
+     * Set --sleep option
+     * 
+     * @param int $seconds
+     * @return void
+     * @see self::$option_sleep
+     */
+	public function setSleep(int $seconds): void
+	{
+		$this->option_sleep = $seconds;
+		return;
+	}
+
+    /**
+     * Set --stderr option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_stderr
+     */
+	public function setStderr(bool $value): void
+	{
+		$this->option_stderr = $value;
+		return;
+	}
+
+    /**
+     * Set --stdout option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_stdout
+     */
+	public function setStdout(bool $value): void
+	{
+		$this->option_stdout = $value;
+		return;
+	}
+
+    /**
+     * Set --tab-correct option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_tab_correct
+     */
+	public function setTabCorrect(bool $value): void
+	{
+		$this->option_tab_correct = $value;
+		return;
+	}
+
+    /**
+     * Set --tab-len option
+     * 
+     * @param int $len
+     * @return void
+     * @see self::$option_tab_len
+     */
+	public function setTabLen(int $len): void
+	{
+		$this->option_tab_len = $len;
+		return;
+	}
+
+    /**
+     * Set --time-format option
+     * 
+     * @param string $format
+     * @return void
+     * @see self::$option_time_format
+     */
+	public function setTimeFormat(string $format): void
+	{
+		$this->option_time_format = $format;
+		return;
+	}
+
+    /**
+     * Set --timeout option
+     * 
+     * @param int $seconds
+     * @return void
+     * @see self::$option_timeout
+     */
+	public function setTimeout(int $seconds): void
+	{
+		$this->option_timeout = $seconds;
+		return;
+	}
+
+    /**
+     * Set --title option
+     * 
+     * @param string $title
+     * @return void
+     * @see self::$option_title
+     */
+	public function setTitle(string $title): void
+	{
+		$this->option_title = $title;
+		return;
+	}
+
+    /**
+     * Set --trim option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_trim
+     */
+	public function setTrim(bool $value): void
+	{
+		$this->option_trim = $value;
+		return;
+	}
+
+    /**
+     * Set --version option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_version
+     */
+	public function setVersion(bool $value): void
+	{
+		$this->option_version = $value;
+		return;
+	}
+
+    /**
+     * Set --visit-items option
+     * 
+     * @param bool $value
+     * @return void
+     * @see self::$option_visit_items
+     */
+	public function setVisitItems(bool $value): void
+	{
+		$this->option_visit_items = $value;
+		return;
+	}
+
+    /**
+     * Set --yes-label option
+     * 
+     * @param string $label
+     * @return void
+     * @see self::$option_yes_label
+     */
+	public function setYesLabel(string $label): void
+	{
+		$this->option_yes_label = $label;
+		return;
+	}
+}
+

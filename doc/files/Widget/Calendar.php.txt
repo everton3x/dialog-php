@@ -1,0 +1,82 @@
+<?php
+/**
+ * Dialog\Widget\Calendar class
+ * 
+ * @author Everton da Rosa <everton3x@gmail.com>
+ * @since 1.0
+ * @package Dialog
+ * @subpackage Widget
+ */
+namespace Dialog\Widget;
+
+use Dialog\Box;
+use DateTime;
+
+/**
+ * Implements --calendar widget
+ * 
+ * A  calendar  box  displays month, day and year in separately adjustable
+ *  windows.  If the values for  day,  month  or  year  are
+ * missing or negative, the current date's corresponding values are
+ * used.  You can increment or decrement any  of  those  using  the
+ * left-, up-, right-, and down-arrows.  Use vi-style h, j, k and l
+ * for moving around the array of days in  a  month.   Use  tab  or
+ * backtab  to move between windows.  If the year is given as zero,
+ * the current date is used as an initial value.
+ * 
+ * On exit, the date is printed in the  form  day/month/year.   The
+ * format can be overridden using the --date-format option.
+ */
+class Calendar extends Box
+{
+
+    /**
+     *
+     * @var DateTime The calendar date.
+     */
+	protected $date = null;
+    
+    /**
+     *
+     * @var string box option for widget
+     */
+	protected $box_string = '--calendar';
+
+    /**
+     * Widget constructor.
+     * 
+     * @param DateTime $date An instance of the DateTime to set a date
+     *  for widget. If omitted, now are used.
+     */
+	public function __construct(DateTime $date = null)
+	{
+		$this->text = 'Calendar';
+		if(!is_null($date)){
+			$this->date = $date;
+		}else{
+			$this->date = new DateTime();
+		}
+
+	}
+
+    /**
+     * Parse calendar options
+     * {@inheritDoc}
+     */
+	public function getBoxOptionString(): string
+	{
+		$str = $this->box_string;
+
+		$str .= " '{$this->text}' {$this->height} {$this->width}";
+
+		$day = $this->date->format('d');
+		$month = $this->date->format('m');
+		$year = $this->date->format('Y');
+
+		$str .= " $day $month $year";
+
+
+		return $str;
+	}
+}
+

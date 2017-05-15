@@ -1,0 +1,32 @@
+<?php
+/**
+ * Dialog\Parser class
+ * @author Everton da Rosa <everton3x@gmail.com>
+ * @since 1.0
+ * @package Dialog
+ */
+namespace Dialog;
+
+/**
+ * Parser implement methods to parse option values to dialog option values.
+ * 
+ * All method names must be parse_value_for_* where * is a option name,
+ *  like Dialog\CommonOptions::$option_begin (--begin) result in
+ *  function parse_value_for_begin()
+ * 
+ * @internal
+ */
+class Parser
+{
+    /**
+     * Parser to --begin
+     * @param array $arg begin values [y, x]
+     * @return string --begin y x
+     * @see \Dialog\CommonOptions::$option_begin
+     */
+	 public static function parse_value_for_begin(array $arg): string
+	 {
+	 	return "{$arg[0]} {$arg[1]}";
+	 }
+}
+
