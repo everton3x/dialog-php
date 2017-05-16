@@ -13,7 +13,5 @@ class Pause extends \Dialog\Options\Box
     public function parseToString(): string
     {
         return $box_options = parent::parseToString()." {$this->seconds}";
-        
     }
-    
 }

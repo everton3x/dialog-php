@@ -35,5 +35,4 @@ class Checklist extends \Dialog\Widgets\Buildlist
 
         return $selected;
     }
-    
 }

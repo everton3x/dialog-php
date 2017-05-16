@@ -14,18 +14,16 @@ class Calendar extends \Dialog\Options\Box
     public function parseToString(): string
     {
         return $box_options = parent::parseToString()." {$this->date->format('d')} {$this->date->format('m')} {$this->date->format('Y')}";
-        
     }
     
     public function date(): \DateTime
     {
-        if($this->common_options->date_format === null){
+        if ($this->common_options->date_format === null) {
             $date_format = 'd/m/Y';
-        }else{
+        } else {
             $date_format = $this->common_options->date_format;
         }
         
         return date_create_from_format($date_format, trim($this->output));
     }
-    
 }

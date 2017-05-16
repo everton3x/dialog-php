@@ -8,5 +8,4 @@ class Passwordform extends \Dialog\Widgets\Form
         parent::__construct($text, $formheight, ...$items);
         $this->widget = 'passwordform';
     }
-        
 }

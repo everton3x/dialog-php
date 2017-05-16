@@ -41,7 +41,7 @@ class MixedField
         return $this->field;
     }
 
-        public function field_pos(): array
+    public function field_pos(): array
     {
         return $this->field_pos;
     }
@@ -61,7 +61,7 @@ class MixedField
         return $this->itype;
     }
 
-        public function parseItem(): string
+    public function parseItem(): string
     {
         return " '{$this->label()}' {$this->label_pos()[0]} {$this->label_pos()[1]} '{$this->field}' {$this->field_pos[0]} {$this->field_pos[1]} {$this->flen()} {$this->ilen()} {$this->itype()}";
     }

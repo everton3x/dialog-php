@@ -12,12 +12,10 @@ class Fselect extends \Dialog\Options\Box
     public function parseToString(): string
     {
         return $box_options = parent::parseToString();
-        
     }
     
     public function selection(): string
     {
         return $this->output();
     }
-    
 }

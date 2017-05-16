@@ -12,7 +12,5 @@ class Msgbox extends \Dialog\Options\Box
     public function parseToString(): string
     {
         return $box_options = parent::parseToString();
-        
     }
-    
 }

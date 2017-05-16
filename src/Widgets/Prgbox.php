@@ -15,5 +15,4 @@ class Prgbox extends \Dialog\Options\Box
         $text = ($this->text === '')? '' : $this->text;
         return "--{$this->widget} '{$text}' '{$this->cmd}' {$this->height} {$this->width}";
     }
-    
 }

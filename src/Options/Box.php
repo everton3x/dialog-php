@@ -35,59 +35,59 @@ class Box extends \Dialog\Options
     
     public function height(int $value = null): int
     {
-        if(is_null($value)){
+        if (is_null($value)) {
             return $this->height;
-        }else{
+        } else {
             return $this->height = $value;
         }
     }
     
     public function width(int $value = null): int
     {
-        if(is_null($value)){
+        if (is_null($value)) {
             return $this->width;
-        }else{
+        } else {
             return $this->width = $value;
         }
     }
     
     public function parseToString(): string
-    {   
+    {
         return "--{$this->widget} '{$this->text}' {$this->height} {$this->width}";
     }
     
     public function output(string $value = null): string
     {
-        if(is_null($value)){
+        if (is_null($value)) {
             return $this->output;
-        }else{
+        } else {
             return $this->output = $value;
         }
     }
     
     public function exit_code(int $value = null): int
     {
-        if(is_null($value)){
+        if (is_null($value)) {
             return $this->exit_code;
-        }else{
+        } else {
             return $this->exit_code = $value;
         }
     }
     
     public function common_options(\Dialog\Options\Common $value = null): \Dialog\Options\Common
     {
-        if(is_null($value)){
+        if (is_null($value)) {
             return $this->common_options;
-        }else{
+        } else {
             return $this->common_options = $value;
         }
     }
     
-    public function dialog(\Dialog\Dialog $dialog = NULL): \Dialog\Dialog
+    public function dialog(\Dialog\Dialog $dialog = null): \Dialog\Dialog
     {
-        if(is_null($dialog)){
+        if (is_null($dialog)) {
             return $this->dialog;
-        }else{
+        } else {
             return $this->dialog = $dialog;
         }
     }

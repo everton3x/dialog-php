@@ -19,7 +19,7 @@ class Inputmenu extends \Dialog\Options\Box
         
         $box_options .= ' '.$this->menu_height;
         
-        foreach ($this->items as $item){
+        foreach ($this->items as $item) {
             $box_options .= $item->parseItem();
         }
         
@@ -30,7 +30,7 @@ class Inputmenu extends \Dialog\Options\Box
     {
         $selected = $this->output();
         
-        if($this->isRenamed()){
+        if ($this->isRenamed()) {
             $selected = $this->parseOutput();
             $selected = $selected[1];
         }
@@ -54,10 +54,9 @@ class Inputmenu extends \Dialog\Options\Box
     {
         $selected = $this->output();
         
-        if(substr($selected, 0, 7) === 'RENAMED'){
+        if (substr($selected, 0, 7) === 'RENAMED') {
             return true;
         }
         return false;
     }
-    
 }

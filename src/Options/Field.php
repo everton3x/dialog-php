@@ -35,7 +35,7 @@ class Field
         return $this->field;
     }
 
-        public function field_pos(): array
+    public function field_pos(): array
     {
         return $this->field_pos;
     }

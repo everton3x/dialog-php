@@ -8,5 +8,4 @@ class Passwordbox extends \Dialog\Widgets\Inputbox
         parent::__construct($text, $init);
         $this->widget = 'passwordbox';
     }
-    
 }

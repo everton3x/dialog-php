@@ -8,7 +8,7 @@ class Options
     
     public function __construct(?array ...$option)
     {
-        if(count($option) > 0){
+        if (count($option) > 0) {
             foreach ($option as $item) {
                 $this->options[$item[0]] = $item[1];
             }
@@ -22,9 +22,9 @@ class Options
         foreach ($this->options as $key => $value) {
             $key = $this->convertToDialogOption($key);
             $value = $this->convertToDialogOptionValue($value);
-            if($value === ''){
+            if ($value === '') {
                 $str .= " --$key";
-            }else{
+            } else {
                 $str .= " --$key $value";
             }
         }
@@ -34,11 +34,11 @@ class Options
     
     protected function convertToDialogOptionValue($value): string
     {
-        if(is_array($value)){
+        if (is_array($value)) {
             $value = join(' ', $value);
-        }elseif(is_string($value)){
+        } elseif (is_string($value)) {
             $value = "'$value'";
-        }elseif (is_bool($value)) {
+        } elseif (is_bool($value)) {
             $value = '';
         }
         
@@ -64,10 +64,10 @@ class Options
     {
         $key = $this->convertToInternalOption($name);
         
-        if(key_exists($key, $this->options)){
+        if (key_exists($key, $this->options)) {
             return $this->options[$key];
-        }else{
-            return NULL;
+        } else {
+            return null;
         }
     }
 }

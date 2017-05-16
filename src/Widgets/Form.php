@@ -19,7 +19,7 @@ class Form extends \Dialog\Options\Box
         
         $box_options .= ' '.$this->formheight;
         
-        foreach ($this->items as $item){
+        foreach ($this->items as $item) {
             $box_options .= $item->parseItem();
         }
         
@@ -32,5 +32,4 @@ class Form extends \Dialog\Options\Box
         array_pop($output);
         return $output;
     }
-    
 }

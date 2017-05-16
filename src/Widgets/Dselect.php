@@ -12,12 +12,10 @@ class Dselect extends \Dialog\Options\Box
     public function parseToString(): string
     {
         return $box_options = parent::parseToString();
-        
     }
     
     public function directory(): string
     {
         return $this->output();
     }
-    
 }

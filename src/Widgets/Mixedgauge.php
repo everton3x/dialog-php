@@ -21,12 +21,11 @@ class Mixedgauge extends \Dialog\Options\Box
         
         $box_options .= " {$this->percent}";
         
-        foreach ($this->items as $item){
+        foreach ($this->items as $item) {
             $box_options .= $item->parseItem();
         }
         
         return $box_options;
-        
     }
     
     public function items(): array

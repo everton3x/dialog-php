@@ -38,9 +38,9 @@ class Dialog
     public function run(): void
     {
 
-        if($this->box_options->widget() === 'programbox' || $this->box_options->widget() === 'progressbox'){
+        if ($this->box_options->widget() === 'programbox' || $this->box_options->widget() === 'progressbox') {
             $cmd = "{$this->box_options->cmd()} | {$this->bin()}{$this->common_options->parseToString()} {$this->box_options->parseToString()}";
-        }else{
+        } else {
             $cmd = "{$this->bin()}{$this->common_options->parseToString()} {$this->box_options->parseToString()}";
         }
 //    	exit($cmd.PHP_EOL);
@@ -67,9 +67,9 @@ class Dialog
             $updater($this);
             $this->write("\n\r100"); //Ensures completion of the gauge
             $this->output = 100;
-        }elseif($this->box_options->widget() === 'mixedgauge'){
+        } elseif ($this->box_options->widget() === 'mixedgauge') {
             //dont do nothing
-        }elseif($this->box_options->widget() === 'programbox'){
+        } elseif ($this->box_options->widget() === 'programbox') {
             //dont do nothing
         } else {//Required to prevent PHP from waiting forever for an output.
             $this->output = stream_get_contents($pipes[2]);
@@ -89,7 +89,7 @@ class Dialog
         return;
     }
 
-    public function bin(string $dialog_bin = NULL): string
+    public function bin(string $dialog_bin = null): string
     {
         if (is_null($dialog_bin)) {
             return $this->dialog_bin;

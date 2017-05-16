@@ -26,9 +26,9 @@ class StepItem
     
     public function running(bool $running = null): bool
     {
-        if(is_null($running)){
+        if (is_null($running)) {
             return $this->running;
-        }else{
+        } else {
             return $this->running = $running;
         }
     }

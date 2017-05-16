@@ -15,11 +15,10 @@ class Gauge extends \Dialog\Options\Box
     public function parseToString(): string
     {
         return $box_options = parent::parseToString()." {$this->percent}";
-        
     }
     
     public function updater()
     {
         return $this->updater;
-    }    
+    }
 }

@@ -19,7 +19,7 @@ class Buildlist extends \Dialog\Options\Box
         
         $box_options .= ' '.$this->list_height;
         
-        foreach ($this->items as $item){
+        foreach ($this->items as $item) {
             $box_options .= $item->parseItem();
         }
         
@@ -44,5 +44,4 @@ class Buildlist extends \Dialog\Options\Box
 
         return $selected;
     }
-    
 }

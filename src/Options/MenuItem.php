@@ -13,8 +13,7 @@ class MenuItem
     }
     
     public function parseItem(): string
-    {   
+    {
         return " '{$this->tag}' '{$this->item}'";
     }
-    
 }
